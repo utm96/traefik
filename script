@@ -1,0 +1,15 @@
+docker rm -f second_webserver
+
+docker run -d --name second_webserver \
+      --label traefik.http.middlewares.second-strip.stripprefix.prefixes='/second-webserver' \
+      --label traefik.http.middlewares.https-redirect.redirectscheme.scheme='https' \
+      --label traefik.http.middlewares.https-redirect.redirectscheme.permanent='true' \
+      --label traefik.http.services.second_webserver.loadbalancer.server.port='80' \
+      --label traefik.http.routers.second_webserver.entrypoints='insecure' \
+      --label traefik.http.routers.second_webserver.rule='PathPrefix(`/second-webserver`)' \
+      --label traefik.http.routers.second_webserver.middlewares='https-redirect@docker' \
+      --label traefik.http.routers.second_webserver_https.entrypoints='secure' \
+      --label traefik.http.routers.second_webserver_https.tls='true' \
+      --label traefik.http.routers.second_webserver_https.middlewares='second-strip' \
+      --label traefik.http.routers.second_webserver_https.rule='PathPrefix(`/second-webserver`)' \
+      httpd:latest
